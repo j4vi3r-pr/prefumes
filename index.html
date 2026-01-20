@@ -171,7 +171,7 @@
                 if(max === min) return false;
                 const ahorroPorcentaje = ((max - min) / max) * 100;
                 p.ahorroTemp = ahorroPorcentaje;
-                return ahorroPorcentaje >= 10;
+                return ahorroPorcentaje >= 5;
             });
             ofertas.sort((a, b) => b.ahorroTemp - a.ahorroTemp);
             
