@@ -1,5 +1,4 @@
 # --- IMPORTS ---
-# AGREGADO: send_from_directory para poder enviar el HTML y las imágenes
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import firebase_admin
@@ -18,11 +17,11 @@ CORS(app)
 
 # --- CONEXIÓN FIREBASE HÍBRIDA (LOCAL Y NUBE) ---
 if not firebase_admin._apps:
+    # 1. Intentamos buscar el archivo (Modo Local)
     if os.path.exists("serviceAccountKey.json"):
-        # Modo Local (Tu PC)
         cred = credentials.Certificate("serviceAccountKey.json")
+    # 2. Si no está, buscamos la variable interna (Modo Nube)
     else:
-        # Modo Nube (Render) - Lee la variable oculta
         key_content = os.environ.get('FIREBASE_CREDENTIALS')
         if key_content:
             key_dict = json.loads(key_content)
