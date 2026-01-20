@@ -1,0 +1,1 @@
+const misPerfumes = [{"nombre": "A Light in the Attic (Perfume Test)", "tiendas": [{"nombre": "Tienda Scrapeada", "precio": 51.77, "url": "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html"}, {"nombre": "Tienda Rival", "precio": 45.0, "url": "#"}]}];

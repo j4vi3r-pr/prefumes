@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfumes PRO</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        body { 
+            margin: 0; 
+            padding-bottom: 50px; 
+            
+            /* --- AQUÍ AGREGAMOS EL FONDO --- */
+            /* Como estamos en el HTML, la ruta es directa a la carpeta img */
+            background-image: url('img/background.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            
+            background-color: #f4f6f8; /* Color de respaldo */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        .nav-links button {
+            background: none; border: none; font-size: 1rem; margin-left: 20px; cursor: pointer; color: #7f8c8d; font-weight: 600; transition: 0.2s;
+        }
+        .nav-links button.active { color: #e67e22; /* Naranja activo */ }
+        .nav-links button:hover { color: #d35400; }
+        
+        .view-section { display: none; padding: 20px; max-width: 900px; margin: 0 auto; }
+        .view-section.active { display: block; }
+        
+        .section-title { font-size: 1.5rem; margin: 30px 0 15px; color: #333; display: flex; align-items: center; gap: 10px; text-shadow: 1px 1px 2px white; }
+        
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        
+        .mini-card {
+            background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s; cursor: pointer; border: 1px solid #eee;
+        }
+        .mini-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .mini-card img { width: 100%; height: 180px; object-fit: contain; padding: 15px; background: #fff; }
+        .mini-info { padding: 15px; text-align: center; }
+        .mini-name { font-size: 0.95rem; font-weight: 700; color: #333; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mini-price { font-size: 1.1rem; color: #2c3e50; font-weight: 800; }
+        .mini-badge { background: #e74c3c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; position: absolute; top: 10px; right: 10px; font-weight: bold; }
+        
+        .saving-badge { background-color: #e74c3c; color: white; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-left: 10px; vertical-align: middle; display: inline-block; }
+        .btn-wsp { display: inline-block; text-decoration: none; background-color: #25D366; color: white; padding: 8px 10px; border-radius: 6px; font-size: 1rem; margin-left: 5px; }
+        
+        .search-area { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 600px; margin: 20px auto; text-align: center; }
+        .input-group { display: flex; gap: 10px; justify-content: center; }
+        
+        /* Botones Naranjas (Cálidos) */
+        #input-cotizar { padding: 12px; border: 2px solid #e67e22; border-radius: 8px; width: 60%; font-size: 1rem; }
+        #btn-cotizar { background-color: #e67e22; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        #btn-cotizar:hover { background-color: #d35400; }
+        
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #e67e22; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="logo" onclick="cambiarVista('home')">🛍️ Perfumes PRO</a>
+        <div class="nav-links">
+            <button id="nav-home" class="active" onclick="cambiarVista('home')">🏠 Inicio</button>
+            <button id="nav-search" onclick="cambiarVista('search')">🔍 Buscador</button>
+        </div>
+    </nav>
+
+    <div id="view-home" class="view-section active">
+        <div class="section-title">🔥 Tendencias (Buscados Recientemente)</div>
+        <div id="grid-tendencias" class="grid-cards">
+            <p style="color:#888">Cargando...</p>
+        </div>
+        <div class="section-title">💎 Mejores Ofertas (+20% Ahorro)</div>
+        <div id="grid-ofertas" class="grid-cards"></div>
+    </div>
+
+    <div id="view-search" class="view-section">
+        <div class="search-area">
+            <h3>⚡ Escáner en Vivo</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Busca en 9 tiendas + Mercado Libre</p>
+            <div class="input-group">
+                <input type="text" id="input-cotizar" placeholder="Ej: Mandarin Sky, Asad...">
+                <button id="btn-cotizar" onclick="cotizarNuevo()">Buscar</button>
+            </div>
+            <p id="estado-cotizacion" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;"></p>
+        </div>
+        <div class="search-box">
+            <input type="text" id="buscador" placeholder="🔎 Filtrar tu lista guardada...">
+        </div>
+        <div id="app-container"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqv0MxyrOttsXwxeS-hLlMoLYtzyU-f9s",
+            authDomain: "prefumes-26934.firebaseapp.com",
+            projectId: "prefumes-26934",
+            storageBucket: "prefumes-26934.firebasestorage.app",
+            messagingSenderId: "1024708645835",
+            appId: "1:1024708645835:web:c62da3de0e214d1129dc4e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let globalPerfumes = [];
+
+        window.cambiarVista = function(vista) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-links button').forEach(el => el.classList.remove('active'));
+            if(vista === 'home') {
+                document.getElementById('view-home').classList.add('active');
+                document.getElementById('nav-home').classList.add('active');
+                renderizarHome();
+            } else {
+                document.getElementById('view-search').classList.add('active');
+                document.getElementById('nav-search').classList.add('active');
+                renderizarLista(globalPerfumes);
+            }
+        };
+
+        window.verDetalle = function(nombrePerfume) {
+            cambiarVista('search');
+            const input = document.getElementById('buscador');
+            input.value = nombrePerfume;
+            input.dispatchEvent(new Event('input'));
+        };
+
+        function iniciarEscucha() {
+            onSnapshot(collection(db, "perfumes"), (snapshot) => {
+                globalPerfumes = [];
+                snapshot.forEach(doc => {
+                    globalPerfumes.push({ id: doc.id, ...doc.data() });
+                });
+                globalPerfumes.sort((a, b) => b.fechaActualizacion - a.fechaActualizacion);
+                renderizarHome();
+                if(document.getElementById('view-search').classList.contains('active')){
+                    const inputBusqueda = document.getElementById('buscador');
+                    if(inputBusqueda.value.length > 0) {
+                        inputBusqueda.dispatchEvent(new Event('input'));
+                    } else {
+                        renderizarLista(globalPerfumes);
+                    }
+                }
+            });
+        }
+
+        function renderizarHome() {
+            const gridTendencias = document.getElementById('grid-tendencias');
+            const gridOfertas = document.getElementById('grid-ofertas');
+            const tendencias = globalPerfumes.slice(0, 4);
+            gridTendencias.innerHTML = tendencias.map(p => crearMiniCard(p)).join('');
+
+            const ofertas = globalPerfumes.filter(p => {
+                const precios = p.tiendas.map(t => t.precio);
+                const min = Math.min(...precios);
+                const max = Math.max(...precios);
+                if(max === min) return false;
+                const ahorroPorcentaje = ((max - min) / max) * 100;
+                p.ahorroTemp = ahorroPorcentaje;
+                return ahorroPorcentaje >= 20;
+            });
+            ofertas.sort((a, b) => b.ahorroTemp - a.ahorroTemp);
+            
+            if(ofertas.length > 0) {
+                gridOfertas.innerHTML = ofertas.slice(0, 4).map(p => crearMiniCard(p, true)).join('');
+            } else {
+                gridOfertas.innerHTML = "<p style='grid-column: 1/-1; text-align:center; color:#999'>No hay grandes ofertas por ahora.</p>";
+            }
+        }
+
+        function crearMiniCard(p, esOferta = false) {
+            const precios = p.tiendas.map(t => t.precio);
+            const minPrecio = Math.min(...precios);
+            let badgeHTML = esOferta ? `<span class="mini-badge">-${Math.round(p.ahorroTemp)}% OFF</span>` : "";
+            return `
+                <div class="mini-card" onclick="verDetalle('${p.nombre}')">
+                    <div style="position:relative">
+                        <img src="${p.imagen}" onerror="this.src='https://via.placeholder.com/150'">
+                        ${badgeHTML}
+                    </div>
+                    <div class="mini-info">
+                        <div class="mini-name">${p.nombre}</div>
+                        <div class="mini-price">$${minPrecio.toLocaleString('es-CL')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderizarLista(lista) {
+            const container = document.getElementById('app-container');
+            container.innerHTML = "";
+            if(lista.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color: #888;'>Sin datos.</p>";
+                return;
+            }
+            lista.forEach(perfume => {
+                const precios = perfume.tiendas.map(t => t.precio);
+                const minPrecio = Math.min(...precios);
+                const maxPrecio = Math.max(...precios);
+                let htmlAhorro = "";
+                if (precios.length > 1 && maxPrecio > minPrecio) {
+                    const ahorro = maxPrecio - minPrecio;
+                    const porcentaje = Math.round((ahorro / maxPrecio) * 100);
+                    if (porcentaje >= 5) htmlAhorro = `<span class="saving-badge">Ahorras $${ahorro.toLocaleString('es-CL')} (${porcentaje}%)</span>`;
+                }
+                const tiendasOrdenadas = perfume.tiendas.sort((a, b) => a.precio - b.precio);
+                let filasHTML = "";
+                tiendasOrdenadas.forEach(tienda => {
+                    const esMejor = tienda.precio === minPrecio;
+                    const mensajeWsp = `¡Mira! Encontré el ${perfume.nombre} a $${tienda.precio.toLocaleString('es-CL')} en ${tienda.nombre}. Link: ${tienda.url}`;
+                    const linkWsp = `https://wa.me/?text=${encodeURIComponent(mensajeWsp)}`;
+                    filasHTML += `
+                        <tr class="${esMejor ? 'best-price' : ''}">
+                            <td>
+                                <div class="store-info">
+                                    <span class="store-name">${tienda.nombre} ${esMejor ? '🔥' : ''}</span>
+                                    <span class="product-full-name">${tienda.nombre_detectado || "Producto detectado"}</span>
+                                </div>
+                            </td>
+                            <td class="price-tag">$${tienda.precio.toLocaleString('es-CL')}</td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                <a href="${tienda.url}" target="_blank" class="btn-shop">Ir a Tienda</a>
+                                <a href="${linkWsp}" target="_blank" class="btn-wsp">📱</a>
+                            </td>
+                        </tr>`;
+                });
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="card-img-box"><img src="${perfume.imagen}" onerror="this.src='https://via.placeholder.com/150'"></div>
+                    <div class="card-body">
+                        <div style="display: flex; align-items: center; flex-wrap: wrap;"><h2>${perfume.nombre}</h2>${htmlAhorro}</div>
+                        <span class="brand">Comparativa de Precios</span>
+                        <table class="price-table">${filasHTML}</table>
+                        <p style="margin-top: 15px; font-size: 0.8rem; color: #aaa;">Actualizado: ${new Date(perfume.fechaActualizacion.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        window.cotizarNuevo = async function() {
+            const input = document.getElementById('input-cotizar');
+            const btn = document.getElementById('btn-cotizar');
+            const estado = document.getElementById('estado-cotizacion');
+            const termino = input.value.trim();
+            if (!termino) return;
+            btn.disabled = true;
+            estado.innerHTML = '<div class="loader"></div> Buscando en 9 tiendas...';
+            try {
+                const response = await fetch(`http://localhost:5000/api/cotizar?q=${encodeURIComponent(termino)}`);
+                const data = await response.json();
+                if (data.status === "success") {
+                    estado.style.color = "green";
+                    estado.innerText = `✅ ¡Listo! Encontrados ${data.data.length} precios.`;
+                    input.value = "";
+                    verDetalle(termino);
+                } else {
+                    estado.style.color = "red";
+                    estado.innerText = "❌ No encontrado.";
+                }
+            } catch (error) {
+                console.error(error);
+                estado.style.color = "red";
+                estado.innerText = "⚠️ Error de conexión.";
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        function normalizarTexto(texto) { return texto.toLowerCase().replace(/\s/g, ''); }
+        document.getElementById('buscador').addEventListener('input', (e) => {
+            const termino = normalizarTexto(e.target.value);
+            const filtrados = globalPerfumes.filter(p => normalizarTexto(p.nombre).includes(termino));
+            renderizarLista(filtrados);
+        });
+        document.getElementById('input-cotizar').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') cotizarNuevo();
+        });
+
+        iniciarEscucha();
+    </script>
+</body>
+</html>

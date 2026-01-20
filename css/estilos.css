@@ -1,0 +1,162 @@
+/* css/estilos.css */
+
+body { 
+            margin: 0; 
+            padding-bottom: 50px; 
+            background-image: url('background.jpg');
+            /* --- SOLUCIÓN SIN IMAGEN (DEGRADADO CÁLIDO) --- */
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); /* Opción suave */
+            /* Si prefieres más color (Naranja/Durazno), usa esta línea de abajo en su lugar: */
+            background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
+            
+            /* Aseguramos que cubra toda la pantalla siempre */
+            min-height: 100vh;
+            
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+h1 { text-align: center; color: #2c3e50; }
+
+/* Contenedor Principal */
+#app-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* --- TARJETA PRINCIPAL (Diseño Horizontal) --- */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+    display: flex; /* Esto pone la foto a la izq y datos a la derecha */
+    overflow: hidden;
+    border: 1px solid #e1e4e8;
+}
+
+/* Caja de la Imagen (Izquierda) */
+.card-img-box {
+    width: 220px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-right: 1px solid #f0f0f0;
+}
+
+.card-img-box img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+}
+
+/* Caja de Datos (Derecha) */
+.card-body {
+    flex: 1; /* Ocupa todo el espacio restante */
+    padding: 25px;
+}
+
+.card-body h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
+}
+
+.brand {
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* --- TABLA DE PRECIOS --- */
+.price-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.price-table tr {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.price-table td {
+    padding: 12px 10px;
+    vertical-align: middle;
+}
+
+/* Información de la Tienda */
+.store-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.store-name {
+    font-weight: 700;
+    color: #333;
+    font-size: 1rem;
+}
+
+.product-full-name {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    margin-top: 4px;
+    line-height: 1.2;
+}
+
+/* Precio */
+.price-tag {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* Destacar el mejor precio */
+.best-price .price-tag {
+    color: #27ae60; /* Verde */
+}
+
+.best-price .store-name {
+    color: #27ae60;
+}
+
+/* Botón "Ir a Tienda" (Colores Cálidos Naranjas) */
+.btn-shop {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #e67e22; /* Naranja cálido */
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn-shop:hover {
+    background-color: #d35400; /* Naranja más oscuro */
+}
+
+/* Buscador */
+.search-box {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#buscador {
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 50px;
+    border: 1px solid #ddd;
+    font-size: 1.1rem;
+    outline: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
