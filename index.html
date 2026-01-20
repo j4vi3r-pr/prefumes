@@ -261,7 +261,7 @@
             btn.disabled = true;
             estado.innerHTML = '<div class="loader"></div> Buscando en 9 tiendas...';
             try {
-                const response = await fetch(`http://localhost:5000/api/cotizar?q=${encodeURIComponent(termino)}`);
+                const response = await fetch(`/api/cotizar?q=${encodeURIComponent(termino)}`);
                 const data = await response.json();
                 if (data.status === "success") {
                     estado.style.color = "green";
