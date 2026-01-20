@@ -1,5 +1,6 @@
 # --- IMPORTS ---
-from flask import Flask, request, jsonify
+# AGREGADO: send_from_directory para poder enviar el HTML y las imágenes
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -16,15 +17,12 @@ app = Flask(__name__)
 CORS(app)
 
 # --- CONEXIÓN FIREBASE HÍBRIDA (LOCAL Y NUBE) ---
-# Esto permite que funcione en tu PC (con el archivo) y en Render (con la variable)
 if not firebase_admin._apps:
     if os.path.exists("serviceAccountKey.json"):
         # Modo Local (Tu PC)
         cred = credentials.Certificate("serviceAccountKey.json")
     else:
         # Modo Nube (Render) - Lee la variable oculta
-        # Si esto falla localmente es normal si no tienes la variable configurada, 
-        # pero en Render funcionará perfecto.
         key_content = os.environ.get('FIREBASE_CREDENTIALS')
         if key_content:
             key_dict = json.loads(key_content)
@@ -254,6 +252,17 @@ def cotizar_endpoint():
     else:
         return jsonify({"status": "error"}), 404
 
+# --- RUTAS NUEVAS PARA QUE SE VEA LA PÁGINA (FRONTEND) ---
+@app.route('/')
+def index():
+    # Cuando entres a la raiz, devuelve el index.html
+    return send_from_directory('.', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    # Cuando el html pida "css/estilos.css" o "img/fondo.jpg", entrégalo
+    return send_from_directory('.', path)
+
 if __name__ == '__main__':
-    # '0.0.0.0' permite conexión externa (celulares, Render, etc)
+    # '0.0.0.0' permite conexión externa
     app.run(debug=True, port=5000, host='0.0.0.0')
