@@ -1,3 +1,4 @@
+# --- IMPORTS ---
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
@@ -7,14 +8,34 @@ from bs4 import BeautifulSoup
 import datetime
 import re
 import concurrent.futures
+import os   # <--- NECESARIO PARA LA NUBE
+import json # <--- NECESARIO PARA LA NUBE
 
 # --- CONFIGURACIÓN ---
 app = Flask(__name__)
 CORS(app)
 
+# --- CONEXIÓN FIREBASE HÍBRIDA (LOCAL Y NUBE) ---
+# Esto permite que funcione en tu PC (con el archivo) y en Render (con la variable)
 if not firebase_admin._apps:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)
+    if os.path.exists("serviceAccountKey.json"):
+        # Modo Local (Tu PC)
+        cred = credentials.Certificate("serviceAccountKey.json")
+    else:
+        # Modo Nube (Render) - Lee la variable oculta
+        # Si esto falla localmente es normal si no tienes la variable configurada, 
+        # pero en Render funcionará perfecto.
+        key_content = os.environ.get('FIREBASE_CREDENTIALS')
+        if key_content:
+            key_dict = json.loads(key_content)
+            cred = credentials.Certificate(key_dict)
+        else:
+            print("⚠️ ADVERTENCIA: No se encontró serviceAccountKey.json ni la variable FIREBASE_CREDENTIALS")
+            cred = None
+
+    if cred:
+        firebase_admin.initialize_app(cred)
+
 db = firestore.client()
 
 HEADERS = {
@@ -110,18 +131,13 @@ def buscar_html(nombre, url_base, busqueda_original):
                             if precios:
                                 precio = int(precios[0].replace('.', ''))
                                 if precio > 2000:
-                                    # --- CORRECCIÓN DE IMAGEN AQUÍ ---
-                                    # Buscamos TODAS las imágenes del cuadro
+                                    # --- CORRECCIÓN DE IMAGEN ---
                                     imagenes_encontradas = padre.find_all('img')
                                     src_img = ""
-                                    
                                     for img in imagenes_encontradas:
                                         posible_src = img.get('data-src') or img.get('src') or ""
-                                        # FILTRO: Si tiene 'webpay', 'transbank', 'visa' o 'icon', LA SALTAMOS
                                         if "webpay" in posible_src.lower() or "transbank" in posible_src.lower() or "icon" in posible_src.lower():
                                             continue
-                                        
-                                        # Si pasa el filtro, esa es la buena
                                         if posible_src:
                                             src_img = posible_src
                                             break 
@@ -188,7 +204,7 @@ def cotizar_endpoint():
     termino = request.args.get('q')
     if not termino: return jsonify({"error": "Falta termino"}), 400
 
-    print(f"\n⚡ BUSCANDO (ANTI-WEBPAY): '{termino}'")
+    print(f"\n⚡ BUSCANDO (NUBE READY): '{termino}'")
     producto_id = termino.lower().replace(" ", "-")
     
     misiones = [
@@ -217,7 +233,6 @@ def cotizar_endpoint():
         
         mejor_img = "https://via.placeholder.com/150"
         for r in resultados:
-            # Buscamos la mejor imagen que NO sea placeholder
             if "via.placeholder" not in r['imagen'] and "http" in r['imagen']:
                 mejor_img = r['imagen']
                 break
@@ -240,5 +255,5 @@ def cotizar_endpoint():
         return jsonify({"status": "error"}), 404
 
 if __name__ == '__main__':
-    print("🚀 SERVIDOR LISTO (IP ABIERTA + ANTI-WEBPAY)")
+    # '0.0.0.0' permite conexión externa (celulares, Render, etc)
     app.run(debug=True, port=5000, host='0.0.0.0')
